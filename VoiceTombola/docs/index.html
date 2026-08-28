@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,6 @@
     <title>Voice Tombola</title>
     <style>
         * { box-sizing: border-box; }
-        h1 { font-size: 2.5rem; font-weight: bold; margin: 20px 10px 10px; }
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -149,7 +148,7 @@
         .cell { background: #000; border: 0.5px solid #222; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #fff; cursor: pointer; }
         .cell.marked { background: #ffc107 !important; color: #000 !important; font-weight: bold; border-radius: 2px; }
 
-        .logo { width: 90%; max-width: 600px; height: auto; margin-top: 20px; opacity: 0.9; }
+        .logo { width: 85%; max-width: 450px; height: auto; margin-top: 20px; opacity: 0.9; }
 
         #chosen-cards-display {
             display: flex;
@@ -214,9 +213,9 @@
             margin-top: 10px;
         }
         h6 {
-             overflow-y: auto;
-             max-height: 150px;
-             padding: 10px;
+            overflow-y: auto;
+            max-height: 300px;
+            padding: 10px;
             font-weight: normal;
             font-size: 0.85rem;
             line-height: 1.4;
@@ -240,7 +239,7 @@
             The host manages the bingo, draws the numbers, and determines and awards
             the prizes. The player, on the other hand, plays by purchasing cards on
             which they mark the drawn numbers and collect the prize. The host can draw
-            the numbers automatically. Three languages ÔÇïÔÇïare available: Italian,
+            the numbers automatically. Three languages ​​are available: Italian,
             English, and Neapolitan, including voice mode. The host is equipped with a
             bag containing the bingo numbers and draws them. He pronounces the number
             aloud, and the app responds with a smorfia, the image, and marks the number
@@ -248,16 +247,16 @@
             smorfia, which can be reset, so anyone can create their own smorfia.
             For single-digit numbers, it's best to prefix the number with a 0 (01, 02, etc.)
             L'app si apre chiedendoti di scegliere tra il presentatore e il giocatore.
-            Il presentatore ├¿ colui che gestisce la tombola, estrae i numeri ,determina e
+            Il presentatore è colui che gestisce la tombola, estrae i numeri ,determina e
             assegna i premi. Il giocatore, invece,gioca acquistando delle cartelle su cui
-            segna i numeri estratti e riscuote il premio. Il presentatore pu├▓ estrarre i
+            segna i numeri estratti e riscuote il premio. Il presentatore può estrarre i
             numeri automaticamente.Sono disponibili tre lingue:italiano, inglese e napoletano,
-            anche con modalit├á vocale.Il presentatore ├¿ dotato di un sacchetto contenente
+            anche con modalità vocale.Il presentatore è dotato di un sacchetto contenente
             i numeri della tombola e li estrae. Pronuncia il numero ad alta voce, l'app
             risponde con la  smorfia , l'immagine  e segna il numero sul tabellone. Una
-            funzionalit├á aggiuntiva  ├¿ la possibilit├á di modificare lo smorfia napoletana,
+            funzionalità aggiuntiva  è la possibilità di modificare lo smorfia napoletana,
             ripristinabile, in modo che chiunque possa creare lo smorfia che desidera.
-            Per i numeri a 1 sola cifra ├¿ meglio anteporre lo 0 (01,02,...)
+            Per i numeri a 1 sola cifra è meglio anteporre lo 0 (01,02,...)
         </h6>
     </div>
 
@@ -299,8 +298,8 @@
 
         <div class="tabellone-container">
             <div id="live-controls" style="padding: 10px; width: 100%; display: none;">
-                <button class="btn-game" style="background:#d32f2f; width:45%;" onclick="getAndroidInterface()?.checkAndStartListening()">­ƒÄñ LISTEN NOW</button>
-                <button class="btn-game" style="background:#1976d2; width:45%;" onclick="getAndroidInterface()?.startLiveAutomatica()">­ƒöè LIVE AUTO</button>
+                <button class="btn-game" style="background:#d32f2f; width:45%;" onclick="getAndroidInterface()?.checkAndStartListening()">🎤 LISTEN NOW</button>
+                <button class="btn-game" style="background:#1976d2; width:45%;" onclick="getAndroidInterface()?.startLiveAutomatica()">🔊 LIVE AUTO</button>
             </div>
             
             <table class="tab" id="tabellone"></table>
@@ -316,7 +315,7 @@
 
         <div class="toolbar" id="game-toolbar">
             <div class="toolbar-row" id="row-extraction">
-                <button class="btn-game" id="btn-estrai" onclick="estrai()">­ƒÄñ VOICE</button>
+                <button class="btn-game" id="btn-estrai" onclick="estrai()">🎤 VOICE</button>
                 <select id="select-interval" onchange="if(timerAuto) { stopAuto(); startAuto(); }" style="padding: 3px; border-radius: 5px; font-size: 0.8rem;">
                     <option value="5000">5s</option>
                     <option value="7000" selected>7s</option>
@@ -535,11 +534,11 @@
 
                 isListening = !isListening;
                 if (isListening) {
-                    btn.innerText = "­ƒÄñ VOICE ON";
+                    btn.innerText = "🎤 VOICE ON";
                     btn.classList.add('btn-voice-on');
                     getAndroidInterface()?.checkAndStartListening();
                 } else {
-                    btn.innerText = "­ƒÄñ VOICE";
+                    btn.innerText = "🎤 VOICE";
                     btn.classList.remove('btn-voice-on');
                 }
             } else {
@@ -603,15 +602,15 @@
             if (!text) return NaN;
             const s = text.toLowerCase().trim().replace(/[.,?']/g, '');
             const mapping = {
-                'uno': 1, 'due': 2, 'tre': 3, 'tr├®': 3, 'quattro': 4, 'cinque': 5, 'sei': 6, 'sette': 7, 'otto': 8, 'nove': 9, 'dieci': 10,
+                'uno': 1, 'due': 2, 'tre': 3, 'tré': 3, 'quattro': 4, 'cinque': 5, 'sei': 6, 'sette': 7, 'otto': 8, 'nove': 9, 'dieci': 10,
                 'undici': 11, 'dodici': 12, 'tredici': 13, 'quattordici': 14, 'quindici': 15, 'sedici': 16, 'diciassette': 17, 'diciotto': 18, 'diciannove': 19, 'venti': 20,
-                'ventuno': 21, 'ventidue': 22, 'ventitr├®': 23, 'ventitre': 23, 'ventiquattro': 24, 'venticinque': 25, 'ventisei': 26, 'ventisette': 27, 'ventotto': 28, 'ventinove': 29, 'trenta': 30,
-                'trentuno': 31, 'trentadue': 32, 'trentatr├®': 33, 'trentatre': 33, 'trentaquattro': 34, 'trentacinque': 35, 'trentasei': 36, 'trentasette': 37, 'trentotto': 38, 'trentanove': 39, 'quaranta': 40,
-                'quarantuno': 41, 'quarantadue': 42, 'quarantatr├®': 43, 'quarantatre': 43, 'quarantaquattro': 44, 'quarantacinque': 45, 'quarantasei': 46, 'quarantasette': 47, 'quarantotto': 48, 'quarantanove': 49, 'cinquanta': 50,
-                'cinquantuno': 51, 'cinquantadue': 52, 'cinquantatr├®': 53, 'cinquantatre': 53, 'cinquantaquattro': 54, 'cinquantacinque': 55, 'cinquantasei': 56, 'cinquantasette': 57, 'cinquantotto': 58, 'cinquantanove': 59, 'sessanta': 60,
-                'sessantuno': 61, 'sessantadue': 62, 'sessantatr├®': 63, 'sessantatre': 63, 'sessantaquattro': 64, 'sessantacinque': 65, 'sessantasei': 66, 'sessantasette': 67, 'sessantotto': 68, 'sessantanove': 69, 'settanta': 70,
-                'settantuno': 71, 'settantadue': 72, 'settantatr├®': 73, 'settantatre': 73, 'settantaquattro': 74, 'settantacinque': 75, 'settantasei': 76, 'settantasette': 77, 'settantotto': 78, 'settantanove': 79, 'ottanta': 80,
-                'ottantuno': 81, 'ottantadue': 82, 'ottantatr├®': 83, 'ottantatre': 83, 'ottantaquattro': 84, 'ottantacinque': 85, 'ottantasei': 86, 'ottantasette': 87, 'ottantotto': 88, 'ottantanove': 89, 'novanta': 90
+                'ventuno': 21, 'ventidue': 22, 'ventitré': 23, 'ventitre': 23, 'ventiquattro': 24, 'venticinque': 25, 'ventisei': 26, 'ventisette': 27, 'ventotto': 28, 'ventinove': 29, 'trenta': 30,
+                'trentuno': 31, 'trentadue': 32, 'trentatré': 33, 'trentatre': 33, 'trentaquattro': 34, 'trentacinque': 35, 'trentasei': 36, 'trentasette': 37, 'trentotto': 38, 'trentanove': 39, 'quaranta': 40,
+                'quarantuno': 41, 'quarantadue': 42, 'quarantatré': 43, 'quarantatre': 43, 'quarantaquattro': 44, 'quarantacinque': 45, 'quarantasei': 46, 'quarantasette': 47, 'quarantotto': 48, 'quarantanove': 49, 'cinquanta': 50,
+                'cinquantuno': 51, 'cinquantadue': 52, 'cinquantatré': 53, 'cinquantatre': 53, 'cinquantaquattro': 54, 'cinquantacinque': 55, 'cinquantasei': 56, 'cinquantasette': 57, 'cinquantotto': 58, 'cinquantanove': 59, 'sessanta': 60,
+                'sessantuno': 61, 'sessantadue': 62, 'sessantatré': 63, 'sessantatre': 63, 'sessantaquattro': 64, 'sessantacinque': 65, 'sessantasei': 66, 'sessantasette': 67, 'sessantotto': 68, 'sessantanove': 69, 'settanta': 70,
+                'settantuno': 71, 'settantadue': 72, 'settantatré': 73, 'settantatre': 73, 'settantaquattro': 74, 'settantacinque': 75, 'settantasei': 76, 'settantasette': 77, 'settantotto': 78, 'settantanove': 79, 'ottanta': 80,
+                'ottantuno': 81, 'ottantadue': 82, 'ottantatré': 83, 'ottantatre': 83, 'ottantaquattro': 84, 'ottantacinque': 85, 'ottantasei': 86, 'ottantasette': 87, 'ottantotto': 88, 'ottantanove': 89, 'novanta': 90
             };
             if (!isNaN(s)) return parseInt(s);
             const sortedKeys = Object.keys(mapping).sort((a, b) => b.length - a.length);
@@ -651,7 +650,7 @@
         function toggleAuto() { if (timerAuto) stopAuto(); else startAuto(); }
         function startAuto() {
             if (isListening) {
-                estrai(); // Se il microfono ├¿ acceso, spegnilo prima di passare a AUTO
+                estrai(); // Se il microfono è acceso, spegnilo prima di passare a AUTO
             }
             const interval = parseInt(document.getElementById('select-interval').value) || 7000;
             estraiRandom();
