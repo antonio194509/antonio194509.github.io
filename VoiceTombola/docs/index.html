@@ -56,6 +56,10 @@
             width: 100%;
             font-size: 0.9rem;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .number-display {
@@ -225,6 +229,46 @@
             text-align: justify;
             width: 90%;
         }
+
+        /* ID FIELD STYLES */
+        .id-container {
+            margin: 15px 0;
+            background: #222;
+            padding: 10px;
+            border-radius: 12px;
+            border: 2px solid #fbc02d;
+            box-shadow: 0 0 10px rgba(251, 192, 45, 0.3);
+        }
+        .id-label {
+            font-size: 0.7rem;
+            color: #fbc02d;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .id-input-field {
+            background: #000;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 8px;
+            font-size: 1.2rem;
+            text-align: center;
+            width: 140px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-family: monospace;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        /* Versione compatta per l'intestazione durante il gioco */
+        .id-input-compact {
+            font-size: 0.9rem;
+            width: 80px;
+            padding: 2px 5px;
+            margin-left: 5px;
+            border: 1px solid #fbc02d;
+        }
     </style>
 </head>
 <body>
@@ -232,6 +276,12 @@
     <!-- 1. START SCREEN -->
     <div id="screen-start" class="screen active-screen">
         <h1>TOMBOLA FAMILY</h1>
+
+        <div class="id-container">
+            <span class="id-label">DEVICE ID / CODICE DISPOSITIVO</span>
+            <input type="text" id="device-id-input" class="id-input-field" maxlength="6" placeholder="------" oninput="handleIdInput(this)">
+        </div>
+
         <button class="btn-main btn-caller" onclick="showScreen('screen-caller-menu')">CALLER</button>
         <button class="btn-main btn-player" onclick="showScreen('screen-player-setup')">PLAYER</button>
         <img src="tombola_splash.png" class="logo" alt="Tombola">
@@ -272,6 +322,12 @@
     <!-- 3. PLAYER SETUP -->
     <div id="screen-player-setup" class="screen">
         <h2>CHOISE CARDS</h2>
+
+        <div class="id-container">
+            <span class="id-label">CALLER ID (CODICE CALLER)</span>
+            <input type="text" id="caller-id-input" class="id-input-field" maxlength="6" placeholder="------" oninput="handleCallerIdInput(this)">
+        </div>
+
         <div class="setup-input-group">
             <input type="number" id="card-number-input" min="1" max="72" placeholder="00">
             <button class="btn-game" onclick="addCard()" style="padding: 10px 15px;">ADD</button>
@@ -284,7 +340,10 @@
 
     <!-- 4. GAME SCREEN -->
     <div id="screen-game" class="screen" style="padding: 0; justify-content: flex-start;">
-        <div class="app-header" id="header-title">VOICE TOMBOLA</div>
+        <div class="app-header">
+            <span id="header-title">VOICE TOMBOLA</span>
+            <input type="text" id="device-id-game-input" class="id-input-field id-input-compact" maxlength="6" placeholder="------" style="display:none;" oninput="handleIdInput(this)">
+        </div>
 
         <div class="number-display">
             <div id="numero">0</div>
@@ -306,7 +365,10 @@
             
             <div id="player-view">
                 <div class="player-header">
-                    <h4>CARDS / CARTELLE</h4>
+                    <h4 style="display: flex; align-items: center;">
+                        CARDS / ID:
+                        <input type="text" id="caller-id-game-input" class="id-input-field id-input-compact" maxlength="6" placeholder="------" oninput="handleCallerIdInput(this)">
+                    </h4>
                     <button class="btn-stop" onclick="triggerExit()">STOP</button>
                 </div>
                 <div id="cartelle-container"></div>
@@ -359,6 +421,55 @@
         let chosenCardIds = [];
         let smorfiaType = 1;
         let isListening = false;
+
+        // Persistent ID logic
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedDeviceId = localStorage.getItem('voice_tombola_device_id');
+            if (savedDeviceId) {
+                document.getElementById('device-id-input').value = savedDeviceId;
+                const gameInput = document.getElementById('device-id-game-input');
+                if (gameInput) gameInput.value = savedDeviceId;
+            }
+
+            const savedCallerId = localStorage.getItem('voice_tombola_caller_id');
+            if (savedCallerId) {
+                const setupInput = document.getElementById('caller-id-input');
+                const gameInput = document.getElementById('caller-id-game-input');
+                if (setupInput) setupInput.value = savedCallerId;
+                if (gameInput) gameInput.value = savedCallerId;
+            }
+        });
+
+        function handleIdInput(input) {
+            // Only alphanumeric, max 6 chars, uppercase
+            let val = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (val.length > 6) val = val.substring(0, 6);
+
+            // Sincronizza i campi del Device ID
+            const startInput = document.getElementById('device-id-input');
+            const gameInput = document.getElementById('device-id-game-input');
+
+            if (startInput && startInput !== input) startInput.value = val;
+            if (gameInput && gameInput !== input) gameInput.value = val;
+
+            input.value = val;
+            localStorage.setItem('voice_tombola_device_id', val);
+        }
+
+        function handleCallerIdInput(input) {
+            let val = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (val.length > 6) val = val.substring(0, 6);
+
+            // Aggiorna entrambi i campi (setup e gioco) per mantenerli sincronizzati
+            const setupInput = document.getElementById('caller-id-input');
+            const gameInput = document.getElementById('caller-id-game-input');
+
+            if (setupInput && setupInput !== input) setupInput.value = val;
+            if (gameInput && gameInput !== input) gameInput.value = val;
+
+            input.value = val;
+            localStorage.setItem('voice_tombola_caller_id', val);
+        }
 
         function getAndroidInterface() { return window.Android || window.android || null; }
 
@@ -429,19 +540,27 @@
             
             const mainStop = document.getElementById('main-stop-btn');
             const gameToolbar = document.getElementById('game-toolbar');
+            const deviceIdGameInput = document.getElementById('device-id-game-input');
 
             if (userRole === 'caller') {
-                document.getElementById('header-title').innerText = "FAMILY CALLER";
+                document.getElementById('header-title').innerText = "CALLER ID:";
+                if (deviceIdGameInput) {
+                    deviceIdGameInput.style.display = 'inline-block';
+                    deviceIdGameInput.value = document.getElementById('device-id-input').value;
+                }
                 document.getElementById('live-controls').style.display = 'block';
                 document.getElementById('live-controls').querySelector('button:nth-child(2)').style.display = 'inline-block'; // Mostra LIVE AUTO
                 gameToolbar.style.display = 'block';
+                document.getElementById('row-extraction').style.display = 'flex';
                 document.getElementById('player-view').style.display = 'none';
                 document.getElementById('tabellone').style.display = 'table';
                 mainStop.style.display = 'block';
             } else {
                 document.getElementById('header-title').innerText = "PLAYER MODE";
+                if (deviceIdGameInput) deviceIdGameInput.style.display = 'none';
                 document.getElementById('live-controls').style.display = 'none'; // Nessun tasto microfono per il Player
-                gameToolbar.style.display = 'none';
+                gameToolbar.style.display = 'block';
+                document.getElementById('row-extraction').style.display = 'none';
                 document.getElementById('player-view').style.display = 'flex';
                 document.getElementById('tabellone').style.display = 'none';
                 mainStop.style.display = 'none';
@@ -556,7 +675,17 @@
 
         function aggiornaUI(n) {
             mostraIconaGrande(n);
-            let nm = getAndroidInterface()?.getCustomTitle(n) || (lingua === 'en' ? SMORFIA_EN[String(n).padStart(2, '0')] : SMORFIA_IT[String(n).padStart(2, '0')]);
+            let nm = getAndroidInterface()?.getCustomTitle(n);
+
+            if (!nm) {
+                if (lingua === 'en') {
+                    nm = SMORFIA_EN[String(n).padStart(2, '0')];
+                } else if (lingua === 'nap') {
+                    nm = (window.SMORFIA_NAP) ? window.SMORFIA_NAP[String(n).padStart(2, '0')] : SMORFIA_IT[String(n).padStart(2, '0')];
+                } else {
+                    nm = SMORFIA_IT[String(n).padStart(2, '0')];
+                }
+            }
 
             const mini = document.getElementById('smorfia-mini');
             if (mini) {
