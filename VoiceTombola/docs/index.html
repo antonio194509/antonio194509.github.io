@@ -308,100 +308,73 @@ body {
         }
     </style>
     <script>
-        window.getAndroidInterface = function() { return window.Android || window.android || null; };
-        window.showAlert = function(msg) { alert(msg); };
-        window.showScreen = function(screenId) {
-            if (typeof updateNapButtonLabel === 'function' && screenId === 'screen-game') { updateNapButtonLabel(); }
-            if (screenId === 'screen-player-setup') {
-                if (typeof chosenCardIds !== 'undefined') chosenCardIds = [];
-                if (typeof occupiedCards !== 'undefined') occupiedCards = [];
-                if (typeof renderCardGrid === 'function') renderCardGrid();
-                if (typeof onPlayerIdEntered === 'function') onPlayerIdEntered();
+        const androidBridge = (typeof window !== 'undefined' && window.android) ? window.android : null;
 
-                if (typeof cardPollInterval !== 'undefined') {
-                    if (cardPollInterval) clearInterval(cardPollInterval);
-                    cardPollInterval = setInterval(fetchOccupiedCards, 400);
-                }
-            } else {
-                if (typeof cardPollInterval !== 'undefined' && cardPollInterval) {
-                    clearInterval(cardPollInterval);
-                    cardPollInterval = null;
-                }
-            }
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            const target = document.getElementById(screenId);
-            if (target) target.classList.add('active-screen');
-        };
+    const startRole = (role, callerId) => {
+    const btn = role === 'caller'
+        ? document.querySelector('#screen-caller-menu .btn-caller')
+        : document.querySelector('#screen-player-setup .btn-player');
 
-        window.startGame = function(role) {
-            const callerIdInput = role === 'player' ? document.getElementById('caller-id-input') : document.getElementById('caller-id-input-caller');
-            const callerId = callerIdInput ? callerIdInput.value.toUpperCase().trim() : '';
+    const originalText = btn ? btn.innerText : '';
 
-            if (!callerId || callerId.length < 3) {
-                showAlert(role === 'player' ? "Please enter the presenter code or IP!" : "Please enter a game code!");
-                return;
+    if (btn) {
+        btn.innerText = (role === 'caller') ? 'CHECKING...' : 'CONNECTING...';
+        btn.disabled = true;
+    }
+
+    if (androidBridge && typeof androidBridge.checkLocalCaller === 'function') {
+        window.pendingRole = role;
+        window.pendingId = callerId;
+
+        window.checkTimeout = setTimeout(() => {
+            if (btn) {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
 
-            if (role === 'player' && typeof chosenCardIds !== 'undefined' && chosenCardIds.length === 0) {
-                showAlert("Please choose your cards!");
-                return;
+            if (role === 'player') {
+                showAlert("Presenter not found! Make sure you are on the same WiFi network or enter the correct IP address.");
             }
+        }, 10000);
 
-            const android = getAndroidInterface();
-            if (role === 'caller') {
-                const btn = document.querySelector('#screen-caller-menu .btn-caller');
-                const originalText = btn ? btn.innerText : '';
-                if (btn) {
-                    btn.innerText = "CHECKING...";
-                    btn.disabled = true;
-                }
+        androidBridge.checkLocalCaller(callerId);
+        return true;
+    }
 
-                if (android && typeof android.checkLocalCaller === 'function') {
-                    window.pendingRole = 'caller';
-                    window.pendingId = callerId;
-                    window.checkTimeout = setTimeout(() => {
-                        if (btn) {
-                            btn.innerText = originalText;
-                            btn.disabled = false;
-                        }
-                    }, 10000);
-                    android.checkLocalCaller(callerId);
-                    return;
-                }
-            } else if (role === 'player') {
-                const btn = document.querySelector('#screen-player-setup .btn-player');
-                const originalText = btn ? btn.innerText : '';
-                if (btn) {
-                    btn.innerText = "CONNECTING...";
-                    btn.disabled = true;
-                }
+    window.userRole = role;
+    showScreen('screen-game');
 
-                if (android && typeof android.checkLocalCaller === 'function') {
-                    window.pendingRole = 'player';
-                    window.pendingId = callerId;
-                    window.checkTimeout = setTimeout(() => {
-                        if (btn) {
-                            btn.innerText = originalText;
-                            btn.disabled = false;
-                        }
-                        showAlert("Presenter not found! Make sure you are on the same WiFi network or enter the correct IP address.");
-                    }, 10000);
-                    android.checkLocalCaller(callerId);
-                    return;
-                }
+    if (typeof initGame === 'function') {
+        initGame();
+    }
+
+    return false;
+};
+
+if (role === 'caller') {
+    startRole('caller', callerId);
+} else if (role === 'player') {
+    startRole('player', callerId);
+}
+;
+
+window.restoreSmorfia = function() {
+    if (confirm("Restore original smorfia?")) {
+        if (typeof getAndroidInterface === 'function') {
+            const androidApi = getAndroidInterface();
+            if (androidApi && typeof androidApi.restoreSmorfiaFromBackup === 'function') {
+                androidApi.restoreSmorfiaFromBackup();
             }
+        }
 
-            userRole = role;
-            showScreen('screen-game');
-            if (typeof initGame === 'function') initGame();
-        };
-
-        window.restoreSmorfia = function() {
-            if (confirm("Restore original smorfia?")) {
-                getAndroidInterface()?.restoreSmorfiaFromBackup();
-                setTimeout(() => { if (typeof updateNapButtonLabel === 'function') updateNapButtonLabel(); }, 500);
+        setTimeout(() => {
+            if (typeof updateNapButtonLabel === 'function') {
+                updateNapButtonLabel();
             }
-        };
+        }, 500);
+    }
+};
+        
     </script>
 </head>
 <body>
