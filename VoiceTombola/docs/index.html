@@ -301,28 +301,45 @@
         }
        
         #screen-player-setup {
-        position: relative;
-        padding-bottom: 90px; /* spazio riservato al footer */
-    }
+    position: relative;
+    height: 100%;
+    padding: 10px 10px calc(12px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-    .player-setup-footer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+#screen-player-setup h2,
+#screen-player-setup .id-container,
+#screen-player-setup #cards-count-info {
+    flex: 0 0 auto;
+}
+
+#card-grid-container.cards-grid-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+}
+
+.player-setup-footer {
+    position: static;
     width: 100%;
     display: flex;
     justify-content: center;
     gap: 10px;
-    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    padding: 8px 0 0;
     background: #000;
     z-index: 20;
+    border-top: 1px solid #333;
+    flex: 0 0 auto;
 }
 
-.cards-grid-container {
-    min-height: 0;
-    overflow-y: auto;
+.player-setup-footer .btn-main {
+    margin: 0;
 }
+      
     </style>
    <script>
        window.getAndroidInterface = function() { return window.Android || window.android || null; };
