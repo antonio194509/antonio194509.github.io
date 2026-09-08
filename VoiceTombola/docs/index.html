@@ -78,6 +78,7 @@
 
         .tabellone-container {
             flex: 1;
+            min-height: 0;
             width: 100%;
             overflow: hidden;
             padding: 0 5px;
@@ -350,6 +351,7 @@
            }
 
            window.userRole = role;
+           if (typeof userRole !== 'undefined') userRole = role;
            showScreen('screen-game');
 
            if (typeof initGame === 'function') {
@@ -710,6 +712,7 @@
                 alert("WARNING: A presenter is already active for this code on the WiFi/Hotspot network!");
             } else {
                 getAndroidInterface()?.claimLocalCaller(callerId);
+                window.userRole = role;
                 userRole = role;
                 showScreen('screen-game');
                 initGame();
@@ -731,6 +734,7 @@
                     return;
                 }
 
+                window.userRole = role;
                 userRole = role;
                 showScreen('screen-game');
                 initGame();
