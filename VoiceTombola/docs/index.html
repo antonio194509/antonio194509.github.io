@@ -302,28 +302,28 @@
     <script>
         window.getAndroidInterface = function() { return window.Android || window.android || null; };
         window.showAlert = function(msg) { alert(msg); };
-        window.showScreen = function(screenId) {
-            if (typeof updateNapButtonLabel === 'function' && screenId === 'screen-game') { updateNapButtonLabel(); }
-            if (screenId === 'screen-player-setup') {
-                if (typeof chosenCardIds !== 'undefined') chosenCardIds = [];
-                if (typeof occupiedCards !== 'undefined') occupiedCards = [];
-                if (typeof renderCardGrid === 'function') renderCardGrid();
-                if (typeof onPlayerIdEntered === 'function') onPlayerIdEntered();
+        // window.showScreen = function(screenId) {
+        //     if (typeof updateNapButtonLabel === 'function' && screenId === 'screen-game') { updateNapButtonLabel(); }
+        //     if (screenId === 'screen-player-setup') {
+        //         if (typeof chosenCardIds !== 'undefined') chosenCardIds = [];
+        //         if (typeof occupiedCards !== 'undefined') occupiedCards = [];
+        //         if (typeof renderCardGrid === 'function') renderCardGrid();
+        //         if (typeof onPlayerIdEntered === 'function') onPlayerIdEntered();
 
-                if (typeof cardPollInterval !== 'undefined') {
-                    if (cardPollInterval) clearInterval(cardPollInterval);
-                    cardPollInterval = setInterval(fetchOccupiedCards, 400);
-                }
-            } else {
-                if (typeof cardPollInterval !== 'undefined' && cardPollInterval) {
-                    clearInterval(cardPollInterval);
-                    cardPollInterval = null;
-                }
-            }
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            const target = document.getElementById(screenId);
-            if (target) target.classList.add('active-screen');
-        };
+        //         if (typeof cardPollInterval !== 'undefined') {
+        //             if (cardPollInterval) clearInterval(cardPollInterval);
+        //             cardPollInterval = setInterval(fetchOccupiedCards, 400);
+        //         }
+        //     } else {
+        //         if (typeof cardPollInterval !== 'undefined' && cardPollInterval) {
+        //             clearInterval(cardPollInterval);
+        //             cardPollInterval = null;
+        //         }
+        //     }
+        //     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        //     const target = document.getElementById(screenId);
+        //     if (target) target.classList.add('active-screen');
+        // };
 
         window.startGame = function(role) {
             const callerIdInput = role === 'player' ? document.getElementById('caller-id-input') : document.getElementById('caller-id-input-caller');
