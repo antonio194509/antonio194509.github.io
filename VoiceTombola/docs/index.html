@@ -26,11 +26,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
+            min-height: 0;
         }
 
         .active-screen {
             display: flex !important;
         }
+        #screen-game { flex: 1 1 auto; min-height: 0; }
+        #screen-player-setup { overflow-y: auto; }
 
         .btn-main {
             width: 80%;
@@ -77,12 +80,13 @@
         #frase { font-size: 0.9rem; font-weight: bold; color: #1976d2; text-transform: uppercase; line-height: 1.1; max-height: 2.2em; overflow: hidden; }
 
         .tabellone-container {
-            flex: 1;
+            flex: 1 1 auto;
             width: 100%;
             overflow: hidden;
             padding: 0 5px;
             display: flex;
             flex-direction: column;
+            min-height: 0;
         }
         .tab {
             width: 100%;
@@ -111,11 +115,12 @@
         .toolbar {
             background: #eee;
             width: 100%;
-
             padding: 5px;
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
             color: #000;
+            flex-shrink: 0;
+            min-height: auto;
         }
         .toolbar-row {
             display: flex;
@@ -215,6 +220,7 @@
             margin: 0 auto;
             flex: 1;
             overflow-y: auto;
+            min-height: 0;
         }
 
         /* Forza 12 colonne per riga per avere 6 righe (72 / 6 = 12) */
@@ -318,6 +324,9 @@
                showAlert("Please choose your cards!");
                return;
            }
+           if (role === 'player' && typeof chosenCardIds !== 'undefined') {
+               window.selectedCardsSnapshot = chosenCardIds.slice();
+           }
 
            const androidBridge = (typeof window !== 'undefined' && window.android) ? window.android : null;
            const btn = role === 'caller'
@@ -349,7 +358,11 @@
                return true;
            }
 
-           window.userRole = role;
+           if (typeof window.setUserRole === 'function') {
+               window.setUserRole(role);
+           } else {
+               window.userRole = role;
+           }
            showScreen('screen-game');
 
            if (typeof initGame === 'function') {
@@ -435,7 +448,7 @@
 
     <p id="cards-count-info" style="font-size: 0.9rem; margin-top: 10px; color: #ffc107; font-weight: bold;">Selected: 0/6</p>
 
-    <div style="width: 100%; display: flex; justify-content: center; gap: 10px;">
+    <div style="width: 100%; display: flex; justify-content: center; gap: 10px; flex-shrink: 0;">
         <button class="btn-main btn-player" onclick="startGame('player')" style="width: 45%;">START</button>
         <button class="btn-main btn-secondary" onclick="triggerExit()" style="width: 45%;">BACK</button>
     </div>
@@ -514,10 +527,17 @@
     let estrazioneVoice = []; // Traccia numeri estratti via voce
     let lingua = 'it';
     let timerAuto = null;
-    let userRole = 'caller';
+    let userRole = window.userRole || 'caller';
     let chosenCardIds = [];
     let smorfiaType = 1;
     let isListening = false;
+    window.userRole = userRole;
+
+    function setUserRole(role) {
+        userRole = role;
+        window.userRole = role;
+    }
+    window.setUserRole = setUserRole;
 
     function getAndroidInterface() { return window.Android || window.android || null; }
 
@@ -553,7 +573,10 @@
         if (screenId === 'screen-game') { updateNapButtonLabel(); }
         if (screenId === 'screen-player-setup') {
             chosenCardIds = []; // Resetta selezioni all'ingresso
+            window.selectedCardsSnapshot = [];
             occupiedCards = [];
+            window.playerNum = null;
+            window.totalPlayers = null;
             renderCardGrid();
             onPlayerIdEntered();
 
@@ -596,7 +619,7 @@
         return id;
     }
     window.clientId = getClientId();
-    window.playerNum = window.playerNum || 1;
+    window.playerNum = Number.isInteger(window.playerNum) && window.playerNum > 0 ? window.playerNum : null;
     window.totalPlayers = window.totalPlayers || 1;
 
     function renderCardGrid() {
@@ -604,35 +627,28 @@
         if (!container) return;
 
         let html = "";
-        let myNum = window.playerNum;
+        const myNum = Number.isInteger(window.playerNum) && window.playerNum > 0 ? window.playerNum : null;
 
-        // I due cicli FOR richiesti:
-        // 1. For dei player (da 1 a max 6)
-        // 2. For interno delle cartelle (da 1 a 72, considerando che le prime 36 sono per i tradizionali, quindi 37-72)
-        for (let p = 1; p <= 6; p++) {
-            if (p !== myNum) continue;
+        for (let c = 1; c <= 72; c++) {
+            if (c < 37) continue; // Le prime 36 sono per i giocatori con cartelle tradizionali
 
-            for (let c = 1; c <= 72; c++) {
-                if (c < 37) continue; // Le prime 36 sono per i giocatori con cartelle tradizionali
+            const isSelected = chosenCardIds.includes(c);
+            const isOccupiedByOther = occupiedCards.includes(c);
 
-                const isSelected = chosenCardIds.includes(c);
-                const isOccupiedByOther = occupiedCards.includes(c);
-
-                // Appena la cartella è cliccata o scelta da altri, deve scomparire dalla griglia
-                if (isSelected || isOccupiedByOther) {
-                    continue;
-                }
-
-                html += `
-                    <div id="card-flag-${c}"
-                         class="card-flag"
-                         onclick="toggleCardSelection(${c})">
-                        ${c}
-                    </div>`;
+            // Appena la cartella è cliccata o scelta da altri, deve scomparire dalla griglia
+            if (isSelected || isOccupiedByOther) {
+                continue;
             }
+
+            html += `
+                <div id="card-flag-${c}"
+                     class="card-flag"
+                     onclick="toggleCardSelection(${c})">
+                    ${c}
+                </div>`;
         }
         container.innerHTML = html;
-        document.getElementById('cards-count-info').innerText = `Player #${myNum} - Selected: ${chosenCardIds.length}/6`;
+        document.getElementById('cards-count-info').innerText = `Player #${myNum || '?'} - Selected: ${chosenCardIds.length}/6`;
     }
 
     function toggleCardSelection(id) {
@@ -649,6 +665,7 @@
         }
 
         chosenCardIds.push(id);
+        window.selectedCardsSnapshot = chosenCardIds.slice();
         renderCardGrid();
 
         // Registra subito la cartella sul server in modo che diventi blu per tutti
@@ -710,7 +727,7 @@
                 alert("WARNING: A presenter is already active for this code on the WiFi/Hotspot network!");
             } else {
                 getAndroidInterface()?.claimLocalCaller(callerId);
-                userRole = role;
+                setUserRole(role);
                 showScreen('screen-game');
                 initGame();
             }
@@ -725,14 +742,19 @@
                 showAlert("Presenter not found on the local network for code " + callerId);
             } else {
                 window.callerIp = hostIp;
+                const selectedCardIds = chosenCardIds.length > 0
+                    ? chosenCardIds.slice()
+                    : (Array.isArray(window.selectedCardsSnapshot) ? window.selectedCardsSnapshot.slice() : []);
 
-                if (chosenCardIds.length === 0) {
+                if (selectedCardIds.length === 0) {
                     showAlert("Please choose your cards!");
                     return;
                 }
 
-                userRole = role;
+                setUserRole(role);
                 showScreen('screen-game');
+                chosenCardIds = selectedCardIds;
+                window.selectedCardsSnapshot = selectedCardIds.slice();
                 initGame();
                 // Assicuriamoci che le cartelle selezionate siano registrate sul server
                 if (chosenCardIds.length > 0) {
@@ -763,7 +785,12 @@
         try {
             const res = JSON.parse(responseJson);
             if (res.cards) occupiedCards = res.cards;
-            if (res.playerNum !== undefined) window.playerNum = res.playerNum;
+            if (res.playerNum !== undefined) {
+                const serverPlayerNum = Number(res.playerNum);
+                if (Number.isInteger(serverPlayerNum) && serverPlayerNum > 0) {
+                    window.playerNum = serverPlayerNum;
+                }
+            }
             if (res.currentChoosingPlayer !== undefined) window.currentChoosingPlayer = res.currentChoosingPlayer;
             if (res.totalPlayers !== undefined) window.totalPlayers = res.totalPlayers;
             renderCardGrid();
@@ -786,6 +813,8 @@
     };
 
     function initGame() {
+        const activeRole = window.userRole || userRole;
+        userRole = activeRole;
         estrazione = [];
         document.getElementById('numero').innerText = "0";
         document.getElementById('frase').innerText = "READY?";
@@ -796,7 +825,7 @@
         const mainStop = document.getElementById('main-stop-btn');
         const gameToolbar = document.getElementById('game-toolbar');
 
-        if (userRole === 'caller') {
+        if (activeRole === 'caller') {
             document.getElementById('header-title').innerText = "FAMILY CALLER";
             document.getElementById('live-controls').style.display = 'block';
             document.getElementById('live-controls').querySelector('button:nth-child(2)').style.display = 'inline-block'; // Mostra LIVE AUTO
