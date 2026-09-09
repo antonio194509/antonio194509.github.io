@@ -5,349 +5,311 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Voice Tombola</title>
     <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000;
-            color: #fff;
-            text-align: center;
-            overflow: hidden;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-        }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #000;
+        color: #fff;
+        text-align: center;
+        overflow: hidden;
+        height: 100dvh;
+        min-height: 100dvh;
+        display: block;
+    }
 
-        .screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            padding: 10px;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-        }
+    .screen {
+        display: none;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100dvh;
+        padding: 10px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        background: #000;
+        overflow: hidden;
+    }
 
-        .active-screen {
-            display: flex !important;
-        }
+    .active-screen { display: flex !important; }
 
-        .btn-main {
-            width: 80%;
-            max-width: 300px;
-            padding: 15px;
-            margin: 10px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: white;
-        }
-        .btn-caller { background: #d32f2f; }
-        .btn-player { background: #1976d2; }
-        .btn-secondary { background: #444; font-size: 0.9rem; padding: 10px; }
-        .btn-stop { background: #ff1744 !important; font-weight: bold; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 4px 10px; font-size: 0.8rem; }
+    .btn-main {
+        width: 80%;
+        max-width: 300px;
+        padding: 15px;
+        margin: 10px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: white;
+    }
+    .btn-caller { background: #d32f2f; }
+    .btn-player { background: #1976d2; }
+    .btn-secondary { background: #444; font-size: 0.9rem; padding: 10px; }
+    .btn-stop { background: #ff1744 !important; font-weight: bold; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 4px 10px; font-size: 0.8rem; }
 
-        .app-header {
-            background: linear-gradient(135deg, #4a76a8, #2a5298);
-            padding: 5px;
-            width: 100%;
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
+    .app-header {
+        background: linear-gradient(135deg, #4a76a8, #2a5298);
+        padding: 5px;
+        width: 100%;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
 
-        .number-display {
-            background: #fff;
-            color: #000;
-            border-radius: 10px;
-            padding: 5px 10px;
-            margin: 5px 0;
-            width: 95%;
-            max-width: 500px;
-            border: 3px solid #4a76a8;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        #numero { font-size: 2.8rem; font-weight: 900; color: #d32f2f; line-height: 1; }
-        #smorfia-mini { height: 45px; width: auto; margin: 0 5px; display: none; object-fit: contain; }
-        #frase-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 10px; overflow: hidden; }
-        #frase { font-size: 0.9rem; font-weight: bold; color: #1976d2; text-transform: uppercase; line-height: 1.1; max-height: 2.2em; overflow: hidden; }
+    .number-display {
+        background: #fff;
+        color: #000;
+        border-radius: 10px;
+        padding: 5px 10px;
+        margin: 5px 0;
+        width: 95%;
+        max-width: 500px;
+        border: 3px solid #4a76a8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    #numero { font-size: 2.8rem; font-weight: 900; color: #d32f2f; line-height: 1; }
+    #smorfia-mini { height: 45px; width: auto; margin: 0 5px; display: none; object-fit: contain; }
+    #frase-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 10px; overflow: hidden; }
+    #frase { font-size: 0.9rem; font-weight: bold; color: #1976d2; text-transform: uppercase; line-height: 1.1; max-height: 2.2em; overflow: hidden; }
 
-        .tabellone-container {
-            flex: 1;
-            min-height: 0;
-            width: 100%;
-            overflow: hidden;
-            padding: 0 5px;
-            display: flex;
-            flex-direction: column;
-        }
-        .tab {
-            width: 100%;
-            height: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            background: #111;
-            border: 1px solid #333;
-        }
-        .tab td {
-            border: 1px solid #333;
-            padding: 0;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-        }
+    .tabellone-container {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+        padding: 0 5px;
+        display: flex;
+        flex-direction: column;
+    }
+    .tab {
+        width: 100%;
+        height: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        background: #111;
+        border: 1px solid #333;
+    }
+    .tab td {
+        border: 1px solid #333;
+        padding: 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #fff;
+    }
 
-        /* Divisioni Tabellone: Linea verticale dopo la 5a colonna e orizzontali ogni 3 righe */
-        .tab td:nth-child(5) { border-right: 3px solid #fff; }
-        .tab tr:nth-child(3) td, .tab tr:nth-child(6) td { border-bottom: 3px solid #fff; }
+    .tab td:nth-child(5) { border-right: 3px solid #fff; }
+    .tab tr:nth-child(3) td, .tab tr:nth-child(6) td { border-bottom: 3px solid #fff; }
 
-        .estratto { background: #2e7d32 !important; color: #fff; }
-        .ultimo { background: #fbc02d !important; color: #000 !important; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .estratto { background: #2e7d32 !important; color: #fff; }
+    .ultimo { background: #fbc02d !important; color: #000 !important; animation: blink 1s infinite; }
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        .toolbar {
-            background: #eee;
-            width: 100%;
-            flex-shrink: 0;
-            padding: 5px;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-            color: #000;
-        }
-        .toolbar-row {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-bottom: 2px;
-            gap: 5px;
-        }
-        .btn-game {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 5px;
-            background: #4a76a8;
-            color: #fff;
-            font-weight: bold;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        .btn-lang.active { background: #2e7d32 !important; }
+    .toolbar {
+        background: #eee;
+        width: 100%;
+        flex-shrink: 0;
+        padding: 5px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        color: #000;
+    }
+    .toolbar-row {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 2px;
+        gap: 5px;
+    }
+    .btn-game {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 5px;
+        background: #4a76a8;
+        color: #fff;
+        font-weight: bold;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    .btn-lang.active { background: #2e7d32 !important; }
 
-        /* --- STILE CARTELLE PLAYER COMPATTO (NO SCROLL) --- */
-        #player-view { display: none; width: 100%; height: 100%; flex-direction: column; }
-        .player-header { display: flex; justify-content: space-between; align-items: center; padding: 2px 5px; background: #333; border-radius: 5px; margin-bottom: 2px; }
-        .player-header h4 { margin: 0; font-size: 0.8rem; color: #ffc107; text-transform: uppercase; }
+    #player-view { display: none; width: 100%; height: 100%; flex-direction: column; }
+    .player-header { display: flex; justify-content: space-between; align-items: center; padding: 2px 5px; background: #333; border-radius: 5px; margin-bottom: 2px; }
+    .player-header h4 { margin: 0; font-size: 0.8rem; color: #ffc107; text-transform: uppercase; }
 
-        #cartelle-container { display: flex; flex-direction: column; flex: 1; gap: 1px; overflow: hidden; }
-        .player-card { display: flex; flex: 1; background: #222; border-bottom: 1px solid #444; width: 100%; align-items: stretch; }
-        .card-side-num { width: 25px; background: #ffc107; color: #000; font-weight: 900; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; writing-mode: vertical-lr; transform: rotate(180deg); }
-        .card-grid { flex: 1; display: grid; grid-template-columns: repeat(9, 1fr); }
-       .cell { background: #000; border: 0.5px solid #222; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #fff; cursor: pointer; }
-        .cell.marked { background: #ffc107 !important; color: #000 !important; font-weight: bold; border-radius: 2px; }
+    #cartelle-container { display: flex; flex-direction: column; flex: 1; gap: 1px; overflow: hidden; }
+    .player-card { display: flex; flex: 1; background: #222; border-bottom: 1px solid #444; width: 100%; align-items: stretch; }
+    .card-side-num { width: 25px; background: #ffc107; color: #000; font-weight: 900; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; writing-mode: vertical-lr; }
+    .card-grid { flex: 1; display: grid; grid-template-columns: repeat(9, 1fr); }
+    .cell { background: #000; border: 0.5px solid #222; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: #fff; cursor: pointer; }
+    .cell.marked { background: #ffc107 !important; color: #000 !important; font-weight: bold; border-radius: 2px; }
 
-        .logo { width: 85%; max-width: 450px; height: auto; margin-top: 20px; opacity: 0.9; }
+    .logo { width: 85%; max-width: 450px; height: auto; margin-top: 20px; opacity: 0.9; }
 
-        #chosen-cards-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
-            justify-content: center;
-        }
-        .card-token {
-            background: #1976d2;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .card-token span { cursor: pointer; color: #ff5252; font-weight: 900; }
-        .setup-input-group { margin-bottom: 20px; }
-        input#card-number-input {
-            padding: 10px;
-            font-size: 1.2rem;
-            border-radius: 5px;
-            border: 2px solid #1976d2;
-            width: 80px;
-            text-align: center;
-            background: #fff;
-            color: #000;
-        }
-        .id-container {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .id-label {
-            font-size: 0.8rem;
-            color: #ffc107;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        #caller-id-input, #caller-id-input-caller {
-            padding: 10px;
-            font-size: 1.1rem;
-            border-radius: 5px;
-            border: 2px solid #ffc107;
-            width: 150px;
-            text-align: center;
-            background: #222;
-            color: #fff;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
+    #chosen-cards-display {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 15px 0;
+        justify-content: center;
+    }
+    .card-token {
+        background: #1976d2;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-token span { cursor: pointer; color: #ff5252; font-weight: 900; }
 
-        /* Nuova Griglia Cartelle */
-        .cards-grid-container {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); /* Default, optimized in JS for 6 rows of 12 if possible or scroll */
-            gap: 5px;
-            width: 100%;
-            max-width: 600px;
-            padding: 10px;
-            margin: 0 auto;
-            flex: 1;
-            overflow-y: auto;
-        }
+    .setup-input-group { margin-bottom: 20px; }
+    input#card-number-input {
+        padding: 10px;
+        font-size: 1.2rem;
+        border-radius: 5px;
+        border: 2px solid #1976d2;
+        width: 80px;
+        text-align: center;
+        background: #fff;
+        color: #000;
+    }
 
-        /* Forza 12 colonne per riga per avere 6 righe (72 / 6 = 12) */
-        @media (min-width: 600px) {
-            .cards-grid-container {
-                grid-template-columns: repeat(12, 1fr);
-            }
-        }
+    .id-container {
+        margin-bottom: 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .id-label {
+        font-size: 0.8rem;
+        color: #ffc107;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    #caller-id-input, #caller-id-input-caller {
+        padding: 10px;
+        font-size: 1.1rem;
+        border-radius: 5px;
+        border: 2px solid #ffc107;
+        width: 150px;
+        text-align: center;
+        background: #222;
+        color: #fff;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
 
-        /* Su mobile restiamo flessibili ma cerchiamo di mantenere la densità */
-        @media (max-width: 599px) {
-            .cards-grid-container {
-                grid-template-columns: repeat(6, 1fr);
-            }
-        }
+    #screen-player-setup h2 { margin: 6px 0; font-size: 1.1rem; }
+    #cards-count-info { margin: 4px 0 !important; font-size: 0.9rem !important; }
 
-        .card-flag {
-            background: #333;
-            color: #fff;
-            padding: 8px 0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            border: 2px solid #444;
-            text-align: center;
-            transition: all 0.2s;
-        }
-        .card-flag:active { transform: scale(0.9); }
-        .card-flag.selected, .card-flag.occupied {
-            background: #1976d2 !important; /* Blu per tutte le cartelle in gioco */
-            color: #ffffff !important;
-            border-color: #ffc107 !important;
-            box-shadow: 0 0 10px rgba(25, 118, 210, 0.8);
-            font-weight: 900;
-        }
-        .btn-voice-on { background: #ff9800 !important; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    .cards-grid-container {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 5px;
+        width: 100%;
+        max-width: 600px;
+        padding: 10px;
+        margin: 0 auto;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    }
 
-        /* LARGE SMORFIA OVERLAY */
-        #large-smorfia-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #large-smorfia-img {
-            width: 350px;
-            height: 350px;
-            object-fit: contain;
-            border: 5px solid #fff;
-            border-radius: 15px;
-            box-shadow: 0 0 30px rgba(255,255,255,0.5);
-        }
-        #large-smorfia-num {
-            font-size: 3rem;
-            font-weight: 900;
-            color: #ffeb3b;
-            text-shadow: 4px 4px 10px #000;
-            margin-top: 10px;
-        }
-        h6 {
-            overflow-y: auto;
-            max-height: 300px;
-            padding: 10px;
-            font-weight: normal;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            margin: 10px 0;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            text-align: justify;
-            width: 90%;
-        }
+    @media (min-width: 600px) {
+        .cards-grid-container { grid-template-columns: repeat(12, 1fr); }
+    }
+    @media (max-width: 599px) {
+        .cards-grid-container { grid-template-columns: repeat(6, 1fr); }
+    }
 
-        /* PLAYER SETUP (ripristino) */
-#screen-player-setup{
-  height:100dvh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  padding:10px;
-}
+    .card-flag {
+        background: #333;
+        color: #fff;
+        padding: 8px 0;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        cursor: pointer;
+        border: 2px solid #444;
+        text-align: center;
+        transition: all 0.2s;
+    }
+    .card-flag:active { transform: scale(0.9); }
+    .card-flag.selected, .card-flag.occupied {
+        background: #1976d2 !important;
+        color: #ffffff !important;
+        border-color: #ffc107 !important;
+        box-shadow: 0 0 10px rgba(25, 118, 210, 0.8);
+        font-weight: 900;
+    }
 
-#screen-player-setup h2,
-#screen-player-setup .id-container,
-#screen-player-setup #cards-count-info{
-  flex:0 0 auto;
-}
+    .btn-voice-on { background: #ff9800 !important; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-#card-grid-container.cards-grid-container{
-  flex:1 1 auto;
-  min-height:0;
-  overflow-y:auto;
-  margin:0;
-  padding:8px;
-}
+    #large-smorfia-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    #large-smorfia-img {
+        width: 350px; height: 350px; object-fit: contain;
+        border: 5px solid #fff; border-radius: 15px;
+        box-shadow: 0 0 30px rgba(255,255,255,0.5);
+    }
+    #large-smorfia-num {
+        font-size: 3rem; font-weight: 900; color: #ffeb3b;
+        text-shadow: 4px 4px 10px #000; margin-top: 10px;
+    }
 
-.player-setup-footer{
-  flex:0 0 auto;
-  display:flex;
-  gap:10px;
-  width:100%;
-  padding:8px 0 calc(8px + env(safe-area-inset-bottom));
-  background:#000;
-  border-top:1px solid #333;
-}
+    h6 {
+        overflow-y: auto;
+        max-height: 300px;
+        padding: 10px;
+        font-weight: normal;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin: 10px 0;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        text-align: justify;
+        width: 90%;
+    }
 
-.player-setup-footer .btn-main{
-  margin:0 !important;
-  width:50% !important;
-  max-width:none;
-}
-  #screen-game.caller-mode #tabellone { display: table !important; }
-  #screen-game.caller-mode #player-view { display: none !important; }
-  #screen-game.caller-mode #row-extraction { display: flex !important; }
-  #screen-game.caller-mode #row-languages { display: flex !important; }
+    #screen-player-setup {
+        position: fixed;
+        inset: 0;
+    }
 
-  #screen-game.player-mode #tabellone { display: none !important; }
-  #screen-game.player-mode #player-view { display: flex !important; }
- #screen-game.player-mode #row-extraction { display: none !important; }
-  #screen-game.player-mode #row-languages { display: flex !important; } /* lingue visibili al player */     
-    
+    .player-setup-footer {
+        position: sticky;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+        background: #000;
+        z-index: 20;
+        border-top: 1px solid #333;
+    }
     </style>
    <script>
        window.getAndroidInterface = function() { return window.Android || window.android || null; };
