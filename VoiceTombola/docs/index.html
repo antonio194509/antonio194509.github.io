@@ -13,7 +13,7 @@
             color: #fff;
             text-align: center;
             overflow: hidden;
-            height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
         }
@@ -299,8 +299,55 @@
             text-align: justify;
             width: 90%;
         }
-       
-       
+
+        /* PLAYER SETUP (ripristino) */
+#screen-player-setup{
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding:10px;
+}
+
+#screen-player-setup h2,
+#screen-player-setup .id-container,
+#screen-player-setup #cards-count-info{
+  flex:0 0 auto;
+}
+
+#card-grid-container.cards-grid-container{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  margin:0;
+  padding:8px;
+}
+
+.player-setup-footer{
+  flex:0 0 auto;
+  display:flex;
+  gap:10px;
+  width:100%;
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+  background:#000;
+  border-top:1px solid #333;
+}
+
+.player-setup-footer .btn-main{
+  margin:0 !important;
+  width:50% !important;
+  max-width:none;
+}
+  #screen-game.caller-mode #tabellone { display: table !important; }
+  #screen-game.caller-mode #player-view { display: none !important; }
+  #screen-game.caller-mode #row-extraction { display: flex !important; }
+  #screen-game.caller-mode #row-languages { display: flex !important; }
+
+  #screen-game.player-mode #tabellone { display: none !important; }
+  #screen-game.player-mode #player-view { display: flex !important; }
+ #screen-game.player-mode #row-extraction { display: none !important; }
+  #screen-game.player-mode #row-languages { display: flex !important; } /* lingue visibili al player */     
+    
     </style>
    <script>
        window.getAndroidInterface = function() { return window.Android || window.android || null; };
@@ -802,26 +849,24 @@
         const mainStop = document.getElementById('main-stop-btn');
         const gameToolbar = document.getElementById('game-toolbar');
 
+               const screenGame = document.getElementById('screen-game');
+        screenGame.classList.remove('caller-mode', 'player-mode');
+
         if (userRole === 'caller') {
+            screenGame.classList.add('caller-mode');
             document.getElementById('header-title').innerText = "FAMILY CALLER";
             document.getElementById('live-controls').style.display = 'block';
-            document.getElementById('live-controls').querySelector('button:nth-child(2)').style.display = 'inline-block'; // Mostra LIVE AUTO
             gameToolbar.style.display = 'block';
-            document.getElementById('row-extraction').style.display = 'flex';
-            document.getElementById('player-view').style.display = 'none';
-            document.getElementById('tabellone').style.display = 'table';
             mainStop.style.display = 'block';
         } else {
+            screenGame.classList.add('player-mode');
             document.getElementById('header-title').innerText = "PLAYER MODE";
-            document.getElementById('live-controls').style.display = 'none'; // Nessun tasto microfono per il Player
+            document.getElementById('live-controls').style.display = 'none';
             gameToolbar.style.display = 'block';
-            document.getElementById('row-extraction').style.display = 'none';
-            document.getElementById('player-view').style.display = 'flex';
-            document.getElementById('tabellone').style.display = 'none';
             mainStop.style.display = 'none';
             createPlayerCards();
         }
-    }
+       } 
 
     function buildTabellone() {
         let html = "";
