@@ -310,6 +310,16 @@
         z-index: 20;
         border-top: 1px solid #333;
     }
+    /* Modalità game: caller/player */
+#screen-game.caller-mode #tabellone { display: table !important; }
+#screen-game.caller-mode #player-view { display: none !important; }
+#screen-game.caller-mode #row-extraction { display: flex !important; }
+#screen-game.caller-mode #row-languages { display: flex !important; }
+
+#screen-game.player-mode #tabellone { display: none !important; }
+#screen-game.player-mode #player-view { display: flex !important; }
+#screen-game.player-mode #row-extraction { display: none !important; }
+#screen-game.player-mode #row-languages { display: flex !important; } /* lingue visibili al player */
     </style>
    <script>
        window.getAndroidInterface = function() { return window.Android || window.android || null; };
@@ -613,61 +623,58 @@
     window.totalPlayers = window.totalPlayers || 1;
 
     function renderCardGrid() {
-        const container = document.getElementById('card-grid-container');
-        if (!container) return;
+    const container = document.getElementById('card-grid-container');
+    if (!container) return;
 
-        let html = "";
-        let myNum = window.playerNum;
-
-        // I due cicli FOR richiesti:
-        // 1. For dei player (da 1 a max 6)
-        // 2. For interno delle cartelle (da 1 a 72, considerando che le prime 36 sono per i tradizionali, quindi 37-72)
-        for (let p = 1; p <= 6; p++) {
-            if (p !== myNum) continue;
-
-            for (let c = 1; c <= 72; c++) {
-                if (c < 37) continue; // Le prime 36 sono per i giocatori con cartelle tradizionali
-
-                const isSelected = chosenCardIds.includes(c);
-                const isOccupiedByOther = occupiedCards.includes(c);
-
-                // Appena la cartella è cliccata o scelta da altri, deve scomparire dalla griglia
-                if (isSelected || isOccupiedByOther) {
-                    continue;
-                }
-
-                html += `
-                    <div id="card-flag-${c}"
-                         class="card-flag"
-                         onclick="toggleCardSelection(${c})">
-                        ${c}
-                    </div>`;
-            }
-        }
-        container.innerHTML = html;
-        document.getElementById('cards-count-info').innerText = `Player #${myNum} - Selected: ${chosenCardIds.length}/6`;
+    const myNum = Number(window.playerNum);
+    if (!myNum || myNum < 1) {
+        document.getElementById('cards-count-info').innerText = 'Connecting to caller...';
+        container.innerHTML = '';
+        return;
     }
 
+    let html = "";
+    for (let p = 1; p <= 6; p++) {
+        if (p !== myNum) continue;
+
+        for (let c = 1; c <= 72; c++) {
+            if (c < 37) continue;
+            const isSelected = chosenCardIds.includes(c);
+            const isOccupiedByOther = occupiedCards.includes(c);
+            if (isSelected || isOccupiedByOther) continue;
+
+            html += `
+                <div id="card-flag-${c}"
+                     class="card-flag"
+                     onclick="toggleCardSelection(${c})">
+                    ${c}
+                </div>`;
+        }
+    }
+    container.innerHTML = html;
+    document.getElementById('cards-count-info').innerText = `Player #${myNum} - Selected: ${chosenCardIds.length}/6`;
+}
+    
     function toggleCardSelection(id) {
-        // Se la cartella è già in gioco (blu per tutti), non la può scegliere e mostra il messaggio
-        if (occupiedCards.includes(id) || chosenCardIds.includes(id)) {
-            showAlert("Card already in play!");
-            return;
-        }
+    const nid = Number(id);
 
-        // Seleziona la cartella (massimo 6)
-        if (chosenCardIds.length >= 6) {
-            showAlert("You can select maximum 6 cards!");
-            return;
-        }
-
-        chosenCardIds.push(id);
-        renderCardGrid();
-
-        // Registra subito la cartella sul server in modo che diventi blu per tutti
-        claimCardOnServer(id);
+    if (occupiedCards.includes(nid) || chosenCardIds.includes(nid)) {
+        showAlert("Card already in play!");
+        return;
     }
 
+    if (chosenCardIds.length >= 6) {
+        showAlert("You can select maximum 6 cards!");
+        return;
+    }
+
+    chosenCardIds.push(nid);
+    renderCardGrid();
+    claimCardOnServer(nid);
+}
+    
+
+       
     function onPlayerIdEntered() {
         const callerIdInput = document.getElementById('caller-id-input');
         const callerId = callerIdInput.value.toUpperCase().trim();
@@ -777,7 +784,9 @@
         if (!responseJson) return;
         try {
             const res = JSON.parse(responseJson);
-            if (res.cards) occupiedCards = res.cards;
+            if (res.cards) {
+    occupiedCards = res.cards.map(x => Number(x)).filter(n => !isNaN(n));
+}
             if (res.playerNum !== undefined) window.playerNum = res.playerNum;
             if (res.currentChoosingPlayer !== undefined) window.currentChoosingPlayer = res.currentChoosingPlayer;
             if (res.totalPlayers !== undefined) window.totalPlayers = res.totalPlayers;
