@@ -616,7 +616,8 @@
     window.totalPlayers = window.totalPlayers || 1;
 
     /* 1) Sostituisci renderCardGrid() */
-function renderCardGrid() {
+
+    function renderCardGrid() {
     const container = document.getElementById('card-grid-container');
     if (!container) return;
 
@@ -631,78 +632,47 @@ function renderCardGrid() {
     for (let c = 37; c <= 72; c++) {
         const isSelected = chosenCardIds.includes(c);
         const isOccupied = occupiedCards.includes(c);
-
-        // se è già presa da chiunque NON deve apparire
         if (isSelected || isOccupied) continue;
 
-        html += `
-            <div id="card-flag-${c}"
-                 class="card-flag"
-                 onclick="toggleCardSelection(${c})">
-                ${c}
-            </div>`;
+        html += `<div id="card-flag-${c}" class="card-flag" onclick="toggleCardSelection(${c})">${c}</div>`;
     }
 
     container.innerHTML = html;
-    document.getElementById('cards-count-info').innerText = `Player #${myNum} - Selected: ${chosenCardIds.length}/6`;
+    document.getElementById('cards-count-info').innerText =
+        `Player #${myNum} - Selected: ${chosenCardIds.length}/6`;
 }
 
-/* 2) Sostituisci toggleCardSelection(id) */
 function toggleCardSelection(id) {
     const nid = Number(id);
 
-    // blocco hard: mai permettere doppia scelta
     if (occupiedCards.includes(nid) || chosenCardIds.includes(nid)) {
         showAlert("Card already in play!");
         return;
     }
-
     if (chosenCardIds.length >= 6) {
         showAlert("You can select maximum 6 cards!");
         return;
     }
 
     chosenCardIds.push(nid);
-    claimCardOnServer(nid); // prima claim server
-    fetchOccupiedCards();   // refresh immediato stato globale
-    renderCardGrid();       // update locale
-}
-
-
-   
-    function toggleCardSelection(id) {
-    const nid = Number(id);
-
-    if (occupiedCards.includes(nid) || chosenCardIds.includes(nid)) {
-        showAlert("Card already in play!");
-        return;
-    }
-
-    if (chosenCardIds.length >= 6) {
-        showAlert("You can select maximum 6 cards!");
-        return;
-    }
-
-    chosenCardIds.push(nid);
-    renderCardGrid();
     claimCardOnServer(nid);
+    fetchOccupiedCards();
+    renderCardGrid();
 }
-    
 
-       
-    function onPlayerIdEntered() {
-        const callerIdInput = document.getElementById('caller-id-input');
-        const callerId = callerIdInput.value.toUpperCase().trim();
-        if (callerId && callerId.length >= 3) {
-            const android = getAndroidInterface();
-            if (android && typeof android.checkLocalCaller === 'function') {
-                window.pendingRole = 'grid_update';
-                window.pendingId = callerId;
-                android.checkLocalCaller(callerId);
-            }
+function onPlayerIdEntered() {
+    const callerIdInput = document.getElementById('caller-id-input');
+    const callerId = callerIdInput.value.toUpperCase().trim();
+    if (callerId && callerId.length >= 3) {
+        const android = getAndroidInterface();
+        if (android && typeof android.checkLocalCaller === 'function') {
+            window.pendingRole = 'grid_update';
+            window.pendingId = callerId;
+            android.checkLocalCaller(callerId);
         }
     }
-
+}
+   
     function fetchOccupiedCards() {
         if (!window.callerIp) {
             onPlayerIdEntered();
@@ -797,7 +767,6 @@ function toggleCardSelection(id) {
 
    window.onGameResponse = function(responseJson) {
     if (!responseJson) return;
-
     try {
         const res = JSON.parse(responseJson);
 
@@ -808,11 +777,6 @@ function toggleCardSelection(id) {
         if (res.playerNum !== undefined && res.playerNum !== null) {
             const pn = Number(res.playerNum);
             if (!isNaN(pn) && pn > 0) window.playerNum = pn;
-        }
-
-        if (res.currentChoosingPlayer !== undefined && res.currentChoosingPlayer !== null) {
-            const cp = Number(res.currentChoosingPlayer);
-            if (!isNaN(cp)) window.currentChoosingPlayer = cp;
         }
 
         if (res.totalPlayers !== undefined && res.totalPlayers !== null) {
@@ -839,9 +803,10 @@ function toggleCardSelection(id) {
             }
         }
     } catch (e) {
-        console.error("onGameResponse parse error:", e, responseJson);
+        console.error("onGameResponse parse error:", e);
     }
 };
+    
     
     function initGame() {
         estrazione = [];
