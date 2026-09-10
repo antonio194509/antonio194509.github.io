@@ -231,19 +231,12 @@
         .cards-grid-container { grid-template-columns: repeat(6, 1fr); }
     }
 
-    .card-flag {
-        background: #333;
-        color: #fff;
-        padding: 8px 0;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        cursor: pointer;
-        border: 2px solid #444;
-        text-align: center;
-        transition: all 0.2s;
-    }
-    .card-flag:active { transform: scale(0.9); }
+        /* 4) Migliora visibilità numero cartella (+5% e grassetto) */
+.card-flag {
+    font-size: 0.90rem;   /* era 0.85rem ≈ +5.9% */
+    font-weight: 900;     /* più bold */
+}
+   .card-flag:active { transform: scale(0.9); }
     .card-flag.selected, .card-flag.occupied {
         background: #1976d2 !important;
         color: #ffffff !important;
@@ -622,7 +615,8 @@
     window.playerNum = window.playerNum || 1;
     window.totalPlayers = window.totalPlayers || 1;
 
-    function renderCardGrid() {
+    /* 1) Sostituisci renderCardGrid() */
+function renderCardGrid() {
     const container = document.getElementById('card-grid-container');
     if (!container) return;
 
@@ -634,27 +628,60 @@
     }
 
     let html = "";
-    for (let p = 1; p <= 6; p++) {
-        if (p !== myNum) continue;
+    for (let c = 37; c <= 72; c++) {
+        const isSelected = chosenCardIds.includes(c);
+        const isOccupied = occupiedCards.includes(c);
 
-        for (let c = 1; c <= 72; c++) {
-            if (c < 37) continue;
-            const isSelected = chosenCardIds.includes(c);
-            const isOccupiedByOther = occupiedCards.includes(c);
-            if (isSelected || isOccupiedByOther) continue;
+        // se è già presa da chiunque NON deve apparire
+        if (isSelected || isOccupied) continue;
 
-            html += `
-                <div id="card-flag-${c}"
-                     class="card-flag"
-                     onclick="toggleCardSelection(${c})">
-                    ${c}
-                </div>`;
-        }
+        html += `
+            <div id="card-flag-${c}"
+                 class="card-flag"
+                 onclick="toggleCardSelection(${c})">
+                ${c}
+            </div>`;
     }
+
     container.innerHTML = html;
     document.getElementById('cards-count-info').innerText = `Player #${myNum} - Selected: ${chosenCardIds.length}/6`;
 }
-    
+
+/* 2) Sostituisci toggleCardSelection(id) */
+function toggleCardSelection(id) {
+    const nid = Number(id);
+
+    // blocco hard: mai permettere doppia scelta
+    if (occupiedCards.includes(nid) || chosenCardIds.includes(nid)) {
+        showAlert("Card already in play!");
+        return;
+    }
+
+    if (chosenCardIds.length >= 6) {
+        showAlert("You can select maximum 6 cards!");
+        return;
+    }
+
+    chosenCardIds.push(nid);
+    claimCardOnServer(nid); // prima claim server
+    fetchOccupiedCards();   // refresh immediato stato globale
+    renderCardGrid();       // update locale
+}
+
+/* 3) Dentro onGameResponse, sostituisci la parte res.cards/res.playerNum */
+if (Array.isArray(res.cards)) {
+    occupiedCards = [...new Set(res.cards.map(x => Number(x)).filter(n => !isNaN(n)))];
+}
+if (res.playerNum !== undefined && res.playerNum !== null) {
+    const pn = Number(res.playerNum);
+    if (!isNaN(pn) && pn > 0) window.playerNum = pn;
+}
+if (res.totalPlayers !== undefined && res.totalPlayers !== null) {
+    const tp = Number(res.totalPlayers);
+    if (!isNaN(tp) && tp > 0) window.totalPlayers = tp;
+}
+renderCardGrid();
+   
     function toggleCardSelection(id) {
     const nid = Number(id);
 
