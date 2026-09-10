@@ -668,19 +668,7 @@ function toggleCardSelection(id) {
     renderCardGrid();       // update locale
 }
 
-/* 3) Dentro onGameResponse, sostituisci la parte res.cards/res.playerNum */
-if (Array.isArray(res.cards)) {
-    occupiedCards = [...new Set(res.cards.map(x => Number(x)).filter(n => !isNaN(n)))];
-}
-if (res.playerNum !== undefined && res.playerNum !== null) {
-    const pn = Number(res.playerNum);
-    if (!isNaN(pn) && pn > 0) window.playerNum = pn;
-}
-if (res.totalPlayers !== undefined && res.totalPlayers !== null) {
-    const tp = Number(res.totalPlayers);
-    if (!isNaN(tp) && tp > 0) window.totalPlayers = tp;
-}
-renderCardGrid();
+
    
     function toggleCardSelection(id) {
     const nid = Number(id);
@@ -807,35 +795,54 @@ renderCardGrid();
         // Obsoleto, gestito ora durante la selezione o in onLocalCallerChecked
     }
 
-    window.onGameResponse = function(responseJson) {
-        if (!responseJson) return;
-        try {
-            const res = JSON.parse(responseJson);
-            if (res.cards) {
-    occupiedCards = res.cards.map(x => Number(x)).filter(n => !isNaN(n));
-}
-            if (res.playerNum !== undefined) window.playerNum = res.playerNum;
-            if (res.currentChoosingPlayer !== undefined) window.currentChoosingPlayer = res.currentChoosingPlayer;
-            if (res.totalPlayers !== undefined) window.totalPlayers = res.totalPlayers;
-            renderCardGrid();
+   window.onGameResponse = function(responseJson) {
+    if (!responseJson) return;
 
-            if (res.status === "error") {
-                if (res.message && res.message.includes("Maximum 6 online players allowed")) {
-                    showAlert(res.message);
-                    triggerExit();
-                } else if (res.message === "Card already taken") {
-                    if (res.cardId) {
-                        chosenCardIds = chosenCardIds.filter(id => id !== res.cardId);
-                    }
-                    showAlert("Card already in play!");
-                    fetchOccupiedCards();
-                } else if (!res.message.includes("Please wait for your turn")) {
-                    showAlert("Server Error: " + res.message);
+    try {
+        const res = JSON.parse(responseJson);
+
+        if (Array.isArray(res.cards)) {
+            occupiedCards = [...new Set(res.cards.map(x => Number(x)).filter(n => !isNaN(n)))];
+        }
+
+        if (res.playerNum !== undefined && res.playerNum !== null) {
+            const pn = Number(res.playerNum);
+            if (!isNaN(pn) && pn > 0) window.playerNum = pn;
+        }
+
+        if (res.currentChoosingPlayer !== undefined && res.currentChoosingPlayer !== null) {
+            const cp = Number(res.currentChoosingPlayer);
+            if (!isNaN(cp)) window.currentChoosingPlayer = cp;
+        }
+
+        if (res.totalPlayers !== undefined && res.totalPlayers !== null) {
+            const tp = Number(res.totalPlayers);
+            if (!isNaN(tp) && tp > 0) window.totalPlayers = tp;
+        }
+
+        renderCardGrid();
+
+        if (res.status === "error") {
+            if (res.message && res.message.includes("Maximum 6 online players allowed")) {
+                showAlert(res.message);
+                triggerExit();
+            } else if (res.message === "Card already taken") {
+                if (res.cardId !== undefined && res.cardId !== null) {
+                    const cid = Number(res.cardId);
+                    chosenCardIds = chosenCardIds.filter(id => Number(id) !== cid);
                 }
+                showAlert("Card already in play!");
+                fetchOccupiedCards();
+                renderCardGrid();
+            } else if (!String(res.message || "").includes("Please wait for your turn")) {
+                showAlert("Server Error: " + (res.message || "unknown error"));
             }
-        } catch(e) {}
-    };
-
+        }
+    } catch (e) {
+        console.error("onGameResponse parse error:", e, responseJson);
+    }
+};
+    
     function initGame() {
         estrazione = [];
         document.getElementById('numero').innerText = "0";
